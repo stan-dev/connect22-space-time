@@ -1,4 +1,4 @@
-# Stan Connect 2022: _Stan Through Space and Time_
+# StanConnect 2022: _Stan Through Space and Time_
 
 
 Host: [__Jamie Hogg__](https://twitter.com/JamieAHogg) (Queensland University of Technology - Australia)
