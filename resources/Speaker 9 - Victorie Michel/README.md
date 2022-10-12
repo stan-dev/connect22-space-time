@@ -1,5 +1,3 @@
-# Speaker_name
+# Victoire Michal
 
-Package (if applicable):
-
-Bio:
+Bio: Victoire is a PhD student in the Biostatistics graduate program at McGill University. She studies Spatial Statistics and Disease Mapping to model the cases of Zika in Rio de Janeiro as well as Small Area Estimation and Record Linkage to estimate the household consumption in Ghana at a fine aggregation level. She holds a Bachelor’s degree in Mathematics and a Master’s degree in Statistics, both from the University of Montreal.
