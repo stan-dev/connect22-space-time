@@ -5,7 +5,7 @@ Host: [__Jamie Hogg__](https://twitter.com/JamieAHogg) (Queensland University of
 
 Speakers: 
 
-- [__Conor Donegan__](https://connordonegan.github.io) (University of Texas - USA)
+- [__Connor Donegan__](https://connordonegan.github.io) (University of Texas - USA)
 - [__Zachary J. Roman__](https://www.psychologie.uzh.ch/de/bereiche/ehem/quamet/team/roman-zack.html) (University of Zurich - Switzerland)
 - [__Silvia De Nicolò__](https://www.unibo.it/sitoweb/silvia.denicolo) (University of Bologna - Italy)
 - [__Sujit Sahu__](https://www.sujitsahu.com) (University of Southampton - UK)
