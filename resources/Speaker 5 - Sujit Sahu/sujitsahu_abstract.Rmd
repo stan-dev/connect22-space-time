@@ -1,0 +1,46 @@
+---
+title: "Fitting spatio-temporal geostatistical models in Stan using the bmstdr R package. "
+output: 
+   BiocStyle::html_document:
+    number_sections: true
+    toc: true
+date: "`r format(Sys.Date(), format='%B %d,  %Y')`"
+author: 
+- name: <a href="https://www.sujitsahu.com/">Sujit K. Sahu </a>
+  affiliation:  University of Southampton
+  email: S.K.Sahu@soton.ac.uk 
+package: bmstdr
+abstract: >
+  In this talk I present the recently published   `R` package `r BiocStyle::CRANpkg("bmstdr")` that is able to fit several Bayesian spatial and spatio-temporal models. Point referenced data are modeled using Gaussian processes and Gaussian error distributions. Two model fitting engines:   `Bspatial` for spatial only point referenced data and `Bsptime` for spatio-temporal  data  are included in the package. Both of these engines admit "Stan" as one of the package options among other possibilities such as `r BiocStyle::CRANpkg("spBayes")`, `r BiocStyle::CRANpkg("spTimer")`,  `r BiocStyle::CRANpkg("spTDyn")` and `r BiocStyle::Rpackage("INLA")`. A third model fitting function, `Bmoving_sptime`, is provided for fitting irregularly observed spatio-temporal data possibly from a set of moving sensors. 
+  
+  
+  The user of `r BiocStyle::CRANpkg("bmstdr")` is afforded the flexibility to name particular rows of their input data frame for validation  purposes. 
+   The package allows quick comparison of models using both model choice criteria,  such as DIC  and WAIC,  and K-fold cross-validation without much programming effort. Familiar linear model fit exploration tools and diagnostic plots are included through the S3 methods such as  `summary`, `residuals` and `plot` implemented for the three `r BiocStyle::CRANpkg("bmstdr")` functions. Our illustrations show that compared to some other packages Stan fitted spatio-temporal models validate better, and also  perform better according to some model choice criteria such as the WAIC. 
+   
+  
+  
+  
+keywords: Areal data, CAR models, geostatistical data modeling, model choice and validation
+
+vignette: >
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{bmstdr: Bayesian Modeling of Spatio-Temporal Data with R}
+  %\VignetteEngine{knitr::rmarkdown}
+---
+```{r style, echo = FALSE, results = 'asis'}
+  BiocStyle::markdown()
+```
+```{css, echo=FALSE}
+.watch-out {
+  background-color: lightpurple;
+  border: 3px solid purple;
+  font-weight: bold;
+}
+```
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  class.source="watch-out",
+  comment = "#>")
+```
+
