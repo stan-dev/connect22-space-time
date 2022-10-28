@@ -1,0 +1,327 @@
+---
+title: 'Fitting spatio-temporal geostatistical models in Stan using the bmstdr R package.'
+author: "Sujit Sahu"
+date: ''
+institute: "Email: S.K.Sahu@soton.ac.uk"
+output: 
+  beamer_presentation:
+    theme: "Boadilla"
+    latex_engine: pdflatex
+    keep_tex: true
+    includes:
+      in_header: preamble-latex.tex  
+classoption: "handout"  
+---
+
+
+## Motivation 
+\begin{itemize}
+\addtolength{\itemsep}{ \baselineskip}
+\item There are many packages for performing spatio-temporal geostatistical modeling, e.g. INLA, spBayes, spTimer etc. 
+
+\item Even the Stan user guide documents how to model using Gaussian process (GP) prior distributions. However, the illustrations are not general enough and only work for specific correlation functions, e.g. Gaussian. 
+
+\item \alert{We are not aware of a Stan based package that can easily fit and validate GP based models along with other covariates. }
+\end{itemize} 
+
+<!---![Image](figures/rv_mapping.png){width=45%}![Image](figures/randomvar.png){width=45%}
+-->
+
+
+## Book BMSTDR and CRAN package bmstdr
+
+\begin{itemize}
+\addtolength{\itemsep}{ \baselineskip}
+
+\item The bmstdr  package accompanies the 2022 book "\tcpurple{Bayesian Modeling of Spatio-Temporal Data with R.}" 
+ 
+
+\centering
+\includegraphics[height=5.25cm, width=3.75cm]{figures/cover.pdf}  
+
+\item The full html version of the package vignette is on my site: 
+\tcblu{https://www.sujitsahu.com} 
+
+\end{itemize}
+
+## What's in this talk (outline)? 
+
+\begin{itemize}
+\addtolength{\itemsep}{ \baselineskip}
+\item It is only going to highlight what's in the package and the book.
+\item Mostly modeling point referenced, i.e. geostatistical data. 
+\item \alert{I am not going to talk about how to program in stan!}
+\item For that please see my book and also resources on the web.  
+\end{itemize}
+
+
+## What's on offer in the bmstdr CRAN package?  
+
+\begin{itemize}
+\item For spatial and spatio-temporal modeling bmstdr offers three main modeling functions: 
+ \begin{enumerate}
+  \item \alert{bspatial}: for spatial only data. Can fit using 
+  \tcforestgreen{spBayes, INLA,  rstan}.   
+  \item \alert{bpstime}: for spatio-temporal data. Can fit using  
+  \tcforestgreen{spBayes, INLA,  rstan, spTimer, sptDyn}.  
+  \item \alert{Bmoving\_sptime}: for data from moving sensors.
+  \item \alert{Bcartime}: for areal data (both geospatial and temporal). Can fit using 
+  \tcforestgreen{CARBayes, CARBayesST, INLA}. 
+  \end{enumerate}
+\item All four functions work with S3 methods: \tcblu{summary, plot, residuals, fitted, coef} and  \tcblu{terms}.  
+\item Validations can be performed just by naming the rows of the model fitting data frame.  
+
+ \end{itemize}
+
+## A general spatial model with nugget effect 
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[height=4cm, width=5cm]{figures/figure1.png}  
+\caption{28 air pollution monitoring sites in New York. This is a running example.} 
+\label{fig:nysites}
+\end{figure}  
+
+\begin{itemize} 
+ \item Consider the general spatial model: 
+
+\begin{equation}
+Y({\bf s}_i) =  {\bf x}'({\bf s}_i) \boldbeta + w({\bf s}_i) + \epsilon({\bf s}_i)
+\label{eq:spatialwithnugget}
+\end{equation}
+
+\item The model has a linear regression part, a spatial component and an independent error. 
+\end{itemize} 
+## bmstdr example code: Bspatial 
+```{r, echo=TRUE, eval=FALSE}
+f1 <- yo3~xmaxtemp+xwdsp+xrh
+# Fit base (Bayesian) linear model 
+M1 <- Bspatial(formula=f1, data=nyspatial)
+?Bspatial
+# No nugget model 
+M2 <- Bspatial(model="spat", formula=f1, data=nyspatial, 
+        coordtype="utm", coords=4:5, phi=0.4)
+# Marginal model using spBayes 
+M3 <- Bspatial(package="spBayes", formula=f1, data=nyspatial, 
+ coordtype="utm", coords=4:5, prior.phi=c(0.005, 2))
+# Marginal model using spBayes 
+M4 <- Bspatial(package="stan", formula=f1, data=nyspatial, 
+coordtype="utm", coords=4:5,phi=0.4, mchoice=T)
+print(M4); summary(M4); residuals(M4); plot(M4); coef(M4)
+# Finally try INLA spde 
+M5  <- Bspatial(package="inla",formula=f1, data=nyspatial)
+```
+
+
+
+```{r, echo=FALSE, eval=TRUE}
+tabs <- lapply(list.files(system.file('txttables', package = 'bmstdr'), full.names = TRUE), dget)
+# print(tabs)
+
+tablepath <- system.file('last3tables', package = 'bmstdr')
+# print(tablepath)
+
+table4.1 <- dget(file=paste0(tablepath, "/table4.1.txt"))
+table4.2 <- dget(file=paste0(tablepath, "/table4.2.txt"))
+table4.3 <- dget(file=paste0(tablepath, "/table4.3.txt"))
+# print(table4.1)
+# print(table4.2)
+# print(table4.3)
+figpath <- system.file("figures", package = "bmstdr") 
+# print(figpath)
+
+table1 <-  tabs[[1]]
+table10 <- tabs[[2]]
+table11 <- tabs[[3]]
+table2 <-  tabs[[4]]
+table3 <-  tabs[[5]]
+table4 <- tabs[[6]]
+table5 <- tabs[[7]]
+table6 <- tabs[[8]]
+table7 <- tabs[[9]]
+table8 <- tabs[[10]]
+table9 <- tabs[[11]]
+
+```
+## Model comparison results 
+
+```{r mchoicenyspatial, echo=FALSE, eval=TRUE}
+knitr::kable(table1, format="latex", digits=2, col.names = colnames(table1), align='r', 
+    caption="Model choice criteria for various models fitted to the nyspatial data set.")
+```
+
+## Model validation by passing the validrows argument. 
+
+```{r, echo=TRUE, eval=FALSE}
+s <- c(8,11,12,14,18,21,24,28)
+M4.v  <- Bspatial(package="stan",formula=f1, data=nyspatial,   
+    coordtype="utm", coords=4:5,phi=0.4, validrows=s) 
+```
+\begin{figure}[tbp]
+\centering
+\includegraphics[height=5cm, width=7cm]{figures/figure2.png}  
+\caption{Prediction against observation plot with the prediction intervals included. The `in/out' symbol in the plot indicates whether or not a prediction interval incudes the 45 degree line.} 
+\label{fig:m2validplot}
+\end{figure} 
+
+
+## The Bsptime function for fitting spatio-temporal models
+\begin{itemize} 
+\item The spatial model (\ref{eq:spatialwithnugget}) is extended to the following spatio-temporal model. 
+\begin{equation}
+Y({\bf s}_i, t) =  {\bf x}'({\bf s}_i, t) \boldbeta + w({\bf s}_i, t) + \epsilon(
+{\bf s}_i, t)
+\label{eq:spatiotemporalwithnugget}
+\end{equation}
+%for $i=1, \ldots, n$ and $t=1, \ldots, T.$ 
+\item Offers a variety of models: such as separable, auto-regressive and marginal 
+modeling after integrating out the spatio-temporal component. 
+\item Package options include \tcforestgreen{stan, spTimer, spTDyn, spBayes, INLA}. \end{itemize} 
+
+## Example code 
+
+```{r, echo=TRUE, eval=FALSE, message=FALSE, results='hide'}
+f2 <- y8hrmax~xmaxtemp+xwdsp+xrh
+M1 <- Bsptime(model="lm", formula=f2, data=nysptime, 
+            scale.transform = "SQRT")
+M2 <- Bsptime(model="separable", formula=f2, data=nysptime, 
+    scale.transform = "SQRT", coordtype="utm", coords=4:5)
+M3 <- Bsptime(package="spTimer", formula=f2, data=nysptime, 
+    model="GP", coordtype="utm", coords=4:5, 
+    scale.transform = "SQRT", N=N)
+M4 <- Bsptime(package="stan",formula=f2, data=nysptime, 
+  coordtype="utm", coords=4:5, scale.transform = "SQRT", 
+  N=Nstan, burn.in=burn.in, mchoice=TRUE, verbose = F)
+```
+
+## Model comparison results  
+
+
+```{r mchoice_m1-m4, echo=FALSE, eval=TRUE}
+knitr::kable(table4, format="latex", digits=2, col.names = c("M1", "M2", "M3", "M4"), align='r', 
+    caption="Model choice  criteria for the four spatio-temporal models M1 to M4.")
+```
+
+## Model validation  results  
+\begin{itemize} 
+\item Set aside all the data from the eight sites as noted previously. 
+\item This gives us 496 ($=8 \times 62$) data points in the validation set and the model is fitted with remaining 1240 space-time observations. 
+\item \tcforestgreen{ M1: Independent, M2: Separable, M3:spTimerGP, M4:stan, M5:INLA, M6:spTimerAR. M7:sptDyn, M9:spTimerGPP.} 
+\end{itemize}
+\footnotesize
+```{r modv-m1-m9, echo=FALSE, eval=TRUE}
+knitr::kable(table7, format="latex", digits=2, col.names = c("M1", "M2", "M3", "M4", "M5", "M6", "M7", "M9"), align='r')
+```
+
+\normalsize
+\begin{itemize} 
+\item The \alert{M4:stan} model is better!
+\end{itemize}
+## Bmoving\_sptime 
+Sahu and Challenor (2008) model ocean temperature data from the roaming Argo floats in the North Atlantic Ocean. 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=10cm]{figures/argo_float_locations_deep.png}
+\caption{Locations of moving Argo floats in the deep ocean in 2003.}
+\label{fig:atl_locations_deep}
+\end{figure}
+
+This data set is included in the bmstdr package.  
+
+
+## Marginal GP model for moving sensors 
+
+\begin{equation}
+{\bf Y}_t \sim N\left({\bf X}_t \boldbeta, \ \ \sigma^2_{w} A_t S_w A_t' + \sigma^2_{\epsilon}  I\right), t=1, \ldots, T
+ \label{eq:marginal_yt_ocean}
+\end{equation}
+\begin{itemize}
+\item ${\bf Y}_t$ and ${\bf X}_t$ are the vector of observations and covariate values at the $n_t$ locations at time $t$. 
+\item $A_{t} = C_{t} S_{w}^{-1}$, where $S_{w}$ is $m \times m$ and has elements induced by the GP and $C_t$ is  $n_t  \times m$ having the $j$th row and $k$th column entry. 
+\item Further details for this model are provided in Section 8.6 in the book. 
+\item The command below fits model (\ref{eq:marginal_yt_ocean}) implemented by code written in Stan. 
+\end{itemize}
+ 
+
+```{r, echo=T, eval=FALSE}
+M2 <- Bmoving_sptime(formula=f2, data = deep, 
+  coordtype="lonlat", coords = 1:2, mchoice =TRUE)
+```
+
+
+
+
+## Annual temperature map 
+
+\begin{itemize}
+\item The model output can be processsed and predictions can be performed by writing additional code. 
+\item See the full version of the vignette. 
+\item Also the book website: \tcblu{https://www.sujitsahu.com/bookbmstdr/}
+\end{itemize} 
+
+\begin{figure}[htbp]
+  \centering
+  \begin{tabular}{cc}
+    \includegraphics[width=0.45 \textwidth]{figures/temp_deep.png} &
+    \includegraphics[width=0.45 \textwidth]{figures/sd_temp_deep.png}
+  \end{tabular}
+  \caption{Annual prediction map (left panel) and sd of the predictions (right panel) of temperature at the
+    deep ocean in 2003.} 
+\label{fig:deep_prediction}
+\end{figure}
+
+## Bcartime is the bmstdr function for areal data modeling 
+
+\begin{itemize}
+\item  Fit using the CARBayes, CARBayesST, and INLA packages. 
+\item  Fit any Generalized Linear Model (GLM) with canonical link, e.g. 
+logistic regression, Poisson log-linear and Gaussian Markov Random Fields. 
+\item Including disease mapping and spatio-temporal disease mapping. 
+\item Validate just by by naming the data rows 
+\item Analyze using S3 methods such as summary and plot. 
+\end{itemize}
+
+\vspace{0.5cm} 
+
+```{r, echo=TRUE, eval=FALSE}
+f1 <- highdeathsmr ~  jsa + log10(houseprice) + log(popdensity) 
+M1st <- Bcartime(formula=f1, data=engdeaths, scol=scol, 
+tcol=tcol, trials=nweek, W=Weng, model="linear", 
+family="binomial", package="CARBayesST")
+```
+
+## CAR modeling Illustration 
+
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width= 0.6 \textwidth]{figures/figure11.png}   
+\caption{Predictions with 95\% limits against observations for the AR (2) model fitted by CARBayesST package (left) and  INLA (right).}
+\label{fig:obs_v_pred_plot}
+\end{center}
+\end{figure}
+
+\begin{itemize} 
+\item Coverage from the \tcforestgreen{CARBayesST} is about right. 
+\item Experienced typically low coverage using \tcforestgreen{INLA}.
+\item Unfortunately no \tcforestgreen{stan} model for areal data.  
+\end{itemize}
+
+
+## Conclusion 
+
+\begin{itemize}
+\item \tcforestgreen{Stan} provides the best model fits and out of sample validations. 
+\item However, it may take longer to run and the user needs to write bespoke code. 
+\item  \tcpurple{bmstdr} provides four \tcred{ready to use} \tcforestgreen{Stan} implemented spatio-temporal geostatistical models. 
+
+\item INLA users: Why not try \tcforestgreen{Stan} with the help of  \tcpurple{bmstdr}?  Stan users: Why not taste \tcgr{INLA} just by calling \tcpurple{bmstdr}? 
+
+\item For code and data go to my github repo: \tcblu{https://github.com/sujit-sahu}
+\item My website \tcblu{https://www.sujitsahu.com/} provides a lot of resources. 
+\item More needs to be done! I am looking for collaborators!!
+\item \alert{Please contact me if you have ideas to improve or if you have any feedback.} \tcgr{S.K.Sahu@soton.ac.uk} 
+\end{itemize}
+
+
+
