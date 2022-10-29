@@ -122,9 +122,9 @@ The first row of the following figure shows Gaussian (left) and NIG (right) whit
 
 The dataset consists of crime rates in thousands ($y_i$) in 49 counties of Columbus, Ohio, and can be found in the `spdep` R package. We will fit the following model:
 $$
-\mathbf{y}_{i}= \beta_0 + \beta_1 \text{HV}_i + \beta_2 \text{HI}_i +  \sigma_{\mathbf{x}}\mathbf{x}_i,
+\mathbf{y}_{i}= \beta_0 + \beta_1 \text{HV}_i + \beta_2 \text{HI}_i +  \sigma\mathbf{x}_i,
 $$
-where $\text{HV}_i$ and $\text{HI}_i$ are the average household value and household income for county $i$, $\mathbf{x}$ is a spatial effects SAR model. 
+where $\text{HV}_i$ and $\text{HI}_i$ are the average household value and household income for county $i$, $\mathbf{x}$ is a spatial effects SAR model.  
 
 ```{r message=FALSE, warning=FALSE}
 data(columbus)
@@ -163,7 +163,7 @@ leaflet(map) %>%
 ```
 
 
-We consider a simultaneous autoregressive (SAR) model for the spatially structured effects $\mathbf{x}$. The Gaussian version of this model can be built from the following system $\mathbf{D}_{SAR}\mathbf{x} = \sigma_{\mathbf{x}}\mathbf{Z}$, where $\mathbf{D}_{SAR}=\mathbf{I}-\rho\mathbf{W}$. The matrix $\mathbf{W}$ is the row standardized adjacency matrix and $-1<\rho<1$. The equivalent model driven by NIG noise is then $\mathbf{D}_{SAR}\mathbf{x} = \sigma_{\mathbf{x}}\mathbf{\Lambda}$, where $\mathbf{\Lambda}$ is i.i.d. standardized NIG noise. 
+We consider a simultaneous autoregressive (SAR) model for the spatially structured effects $\mathbf{x}$. The Gaussian version of this model can be built from the following system $\mathbf{D}_{SAR}\mathbf{x} = \sigma\mathbf{Z}$, where $\mathbf{D}_{SAR}=\mathbf{I}-\rho\mathbf{W}$. The matrix $\mathbf{W}$ is the row standardized adjacency matrix and $-1<\rho<1$. The equivalent model driven by NIG noise is then $\mathbf{D}_{SAR}\mathbf{x} = \sigma\mathbf{\Lambda}$, where $\mathbf{\Lambda}$ is i.i.d. standardized NIG noise. 
 
 We obtain next the adjacency matrix $\mathbf{W}$.
 
@@ -259,7 +259,7 @@ knitr::kable(head(fit_NIG$summary(),8), "simple", row.names = NA, digits=2)
 ``` 
 
 
-The NIG noise $\Lambda_i$ can be seen as a normal variance mixture. In the symmetric case, $\Lambda_i|V_i \sim N(0,V_i)$, where $V_i$ are inverse-Gaussian mixing variables. The posterior draws for $\mathbf{V} = [V_1,\dotsc,V_N]^T$ can be generated based from the posterior draws of $\mathbf{x}$, $\eta^\star$, $\zeta^\star$ and $\rho$ as done next. We utilized the function `VposteriorSAR` located at `files/utils.R`. High values for $V_i$ indicate that region $i$ had a spike in the spatial effects that was not captured by the covariates, which are usually too large to be modeled by a Gaussian model. 
+The NIG noise $\Lambda_i$ can be seen as a normal variance mixture. In the symmetric case, $\Lambda_i|V_i \sim N(0,V_i)$, where $V_i$ are inverse-Gaussian mixing variables. The posterior draws for $\mathbf{V} = [V_1,\dotsc,V_N]^T$ can be generated from the posterior draws of $\mathbf{x}$, $\eta^\star$, $\zeta^\star$ and $\rho$ as done next. We utilized the function `VposteriorSAR` located at `files/utils.R`. High values for $V_i$ indicate that region $i$ had a spike in the spatial effects that was not captured by the covariates, which are too large to be modeled by a Gaussian model. 
 
 ```{r}
 X     <- as.matrix(as_draws_df(fit_NIG$draws("x")))[,1:N]
